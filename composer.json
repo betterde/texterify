@@ -1,0 +1,36 @@
+{
+    "name": "betterde/texterify",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "George King",
+            "email": "george@betterde.com"
+        }
+    ],
+    "keywords": ["texterify", "TMS", "CLI", "texterify-cli", "localization", "i18n", "internationalization", "translation"],
+    "description": "A command-line tool for batch synchronization of language packs between local and texterify TMS",
+    "require": {
+        "php": ">=8.0",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "mnapoli/silly": "^1.8.0",
+        "illuminate/http": "^7.0|^8.0|^9.0|^10.0",
+        "guzzlehttp/guzzle": "7.5.0",
+        "illuminate/support": "^7.0|^8.0|^9.0|^10.0",
+        "illuminate/console": "^7.0|^8.0|^9.0|^10.0",
+        "illuminate/container": "^7.0|^8.0|^9.0|^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Betterde\\TranslatorCli\\": "src/"
+        },
+        "files": [
+            "includes/helpers.php"
+        ]
+    },
+    "bin": [
+        "texterify"
+    ],
+    "minimum-stability": "stable"
+}

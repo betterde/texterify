@@ -1,0 +1,111 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Load correct autoloader depending on install location.
+ */
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require __DIR__ . '/vendor/autoload.php';
+} else {
+    require getenv('HOME') . '/.composer/vendor/autoload.php';
+}
+
+use Silly\Application;
+use Illuminate\Container\Container;
+use Betterde\TranslatorCli\Project;
+use Betterde\TranslatorCli\Certification;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
+
+/**
+ * Create the application.
+ */
+Container::setInstance(new Container);
+
+$version = 'v1.0.1';
+
+$app = new Application('Texterify CLI', $version);
+
+$app->command('auth endpoint project email token', function ($endpoint = null, $project = null, $email = null, $token = null, $force = null) {
+    if (empty($endpoint)) {
+        warn('Please enter the domain name of the texterify service.');
+    }
+
+    if (empty($project)) {
+        warn('Please enter the project id of the texterify service.');
+    }
+
+    if (empty($email)) {
+        warn('Please enter the user email of the texterify service.');
+    }
+
+    if (empty($token)) {
+        warn('Please enter the access token of the Translator service.');
+    }
+
+    Certification::verify($endpoint, $project, $email, $token, $force);
+})->addOption('--force', '-f', InputOption::VALUE_NONE, 'Whether to force the certification file to be overwritten')
+    ->descriptions('Generate authentication information', [
+        'endpoint' => 'Translator service api endpoint',
+        'project' => 'Project id in translator service',
+        'email' => 'User email address',
+        'token' => 'User access token'
+    ]);
+
+$app->command('language', function ($action = null, $path = null) {
+    $path = projectPath($path);
+    Certification::load($path);
+    $project = new Project(Certification::$project, $path);
+
+    if ($action == 'list') {
+        $project->fetchLanguages()->renderLanguagesToTable();
+    }
+})->descriptions('Display the languages supported by the project')
+    ->addArgument('action', InputArgument::REQUIRED, 'The subcommands available to the language: list, create')
+    ->addOption('path', '-p', InputOption::VALUE_OPTIONAL, 'Set the path of the project');
+
+$app->command('component', function ($action = null, $component = null, $path = null, $language = null) {
+    $path = projectPath($path);
+    Certification::load($path);
+    $project = new Project(Certification::$project, $path);
+    $project->loadComponents(true, $language);
+    switch ($action) {
+        case 'list':
+            $project->renderComponentsToTable();
+            break;
+        case 'push':
+            $project->pushKeyAndTranslationToRemote($component, $language);
+            break;
+        case 'pull':
+            $project->pullTranslations($component, $language);
+    }
+})->descriptions('The operations of components')
+    ->addArgument('action', InputArgument::REQUIRED, 'The subcommands available to the component: list, push and pull')
+    ->addArgument('component', InputArgument::OPTIONAL, 'Specify the component that you want to operate')
+    ->addOption('path', '-p', InputOption::VALUE_OPTIONAL, 'Set the path of the project')
+    ->addOption('language', '-l', InputOption::VALUE_OPTIONAL, 'Specify the language to pull from the remote');
+
+$app->command('project', function ($action = null, $path = null) {
+    $path = projectPath($path);
+    Certification::load($path);
+
+    switch ($action) {
+        case 'info':
+            $project = new Project(Certification::$project, $path);
+            $project->fetchDetail();
+            break;
+        case '':
+            break;
+    }
+})->descriptions('The operations of project')
+    ->addArgument('action', InputArgument::REQUIRED, 'The subcommands available to the component: create, sync')
+    ->addOption('path', '-p', InputOption::VALUE_OPTIONAL, 'Set the path of the project');
+
+/**
+ * Run the application.
+ */
+try {
+    $app->run();
+} catch (Exception $e) {
+    warn($e->getMessage());
+}
