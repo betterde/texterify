@@ -337,10 +337,11 @@ class Project
                 $translations = [];
                 foreach ($response as $item) {
                     $content = Arr::get($item, "translations.$language->name");
+                    $index = Str::after($item['name'], $component->name . '.');
                     if (!empty($content)) {
-                        $translations[$item['name']] = $content;
+                        $translations[$index] = $content;
                     } elseif ($fallback) {
-                        $translations[$item['name']] = Arr::get($item, 'default');
+                        $translations[$index] = Arr::get($item, 'default');
                     }
                 }
 

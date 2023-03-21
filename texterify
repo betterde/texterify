@@ -22,7 +22,7 @@ use Symfony\Component\Console\Input\InputArgument;
  */
 Container::setInstance(new Container);
 
-$version = 'v1.0.1';
+$version = 'v1.0.2';
 
 $app = new Application('Texterify CLI', $version);
 
