@@ -6,9 +6,9 @@ A command-line tool for batch synchronization of language packs between local an
 
 # Features
 
-* [X] Importing project language packages to the Translator service
-* [X] Export Translator translated language packs to your local project
-* [X] Support for beautifying PHP array code using short array format
+* [X] Push project language packages to the Texterify service
+* [X] Pull Texterify translated language packs to your local project
+* [X] Support for beautifying PHP array code using short array format (using laravel/pint package)
 
 # Installation
 
